@@ -239,12 +239,14 @@ h2{font-size:22px;font-weight:600;margin:16px 0 22px}
    Se a foto não existir, aparece o emoji. */
 const MENU = [
   {id:'pao',       cat:'Salgados', nome:'Pão de Queijo',        preco:7,   emoji:'🧀', img:'img/pao-de-queijo.jpg',    desc:'O clássico mineiro, assado na hora. Porção com 6 unidades.'},
+  {id:'joelho',    cat:'Salgados', nome:'Joelho',               preco:6,   emoji:'🥐', img:'img/joelho.jpg',           desc:'O clássico carioca: massa macia enrolada com presunto e queijo.'},
   {id:'sanduiche', cat:'Salgados', nome:'Sanduíche natural',    preco:5,   emoji:'🥪', img:'img/sanduiche.jpg',        desc:'Leve e fresquinho, preparado com frango, cenoura e alface.'},
   {id:'torta',     cat:'Salgados', nome:'Torta de frango',      preco:8,   emoji:'🥧', img:'img/torta-de-frango.jpg',  desc:'Massa macia recheada com frango cremoso e milho.'},
   {id:'coxinha',   cat:'Salgados', nome:'Coxinha',              preco:6,   emoji:'🍗', img:'img/coxinha.jpg',          desc:'Massa crocante com recheio de frango com catupiry.'},
   {id:'palha',     cat:'Doces',    nome:'Palha Italiana',       preco:3,   emoji:'🍫', img:'img/palha-italiana.jpg',   desc:'Brigadeiro com biscoito, cortado em quadradinhos.'},
   {id:'brigadeiro',cat:'Doces',    nome:'Brigadeiro',           preco:2.5, emoji:'🍬', img:'img/brigadeiro.jpg',       desc:'Brigadeiro gourmet com granulado belga.'},
   {id:'bolo',      cat:'Doces',    nome:'Bolo de cenoura',      preco:5,   emoji:'🍰', img:'img/bolo-de-cenoura.jpg',  desc:'Fatia generosa com cobertura de chocolate.'},
+  {id:'mentos',    cat:'Doces',    nome:'Mentos',               preco:3.5, emoji:'🍬', img:'img/mentos.jpg',           desc:'Bala mastigável sabor frutas, rolo com 14 unidades.'},
   {id:'salada',    cat:'Veganos',  nome:'Salada de frutas',     preco:7,   emoji:'🍓', img:'img/salada-de-frutas.jpg', desc:'Frutas frescas da estação, servidas geladas.'},
   {id:'wrap',      cat:'Veganos',  nome:'Wrap de grão-de-bico', preco:9,   emoji:'🌯', img:'img/wrap.jpg',             desc:'Tortilha integral com homus, legumes e folhas.'},
   {id:'guaravita', cat:'Bebidas',  nome:'Guaravita',            preco:2,   emoji:'🥤', img:'img/guaravita.jpg',        desc:'Copo de 290 ml, bem gelado.'},
@@ -361,7 +363,7 @@ function renderMenu(){
   const list = $('#menuList'); list.replaceChildren();
   MENU.filter(m => state.cat === 'Todos' || m.cat === state.cat).forEach(m => {
     const thumb = el('div', {className:'thumb'});
-    const img = el('img', {src:m.img, alt:m.nome, loading:'lazy'});
+    const img = el('img', {src:m.img, alt:m.nome});
     img.onerror = () => { thumb.textContent = m.emoji; };
     thumb.append(img);
     list.append(el('div', {className:'card'},
