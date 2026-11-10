@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E42727">
+<title>A Cantina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kalam:wght@700&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#E42727; --red-dark:#A81A1A; --red-soft:#F28B8B;
+  --grey:#D9D9D9; --line:#7A7A7A; --ink:#111; --muted:#555;
+  --white:#fff; --black:#000;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Inter,system-ui,sans-serif;background:#2a2a2a;color:var(--ink);display:flex;justify-content:center}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{width:100%;max-width:430px;height:100dvh;display:flex;flex-direction:column;background:var(--white);position:relative;overflow:hidden}
+
+/* Cabeçalho */
+header{background:var(--red);height:64px;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
+header h1{font-family:Kalam,cursive;color:#fff;font-size:30px;font-weight:700;letter-spacing:.5px;line-height:1}
+.back{position:absolute;left:6px;top:50%;transform:translateY(-50%);background:none;border:0;color:#fff;width:44px;height:44px;border-radius:50%;display:none;place-items:center}
+.back.show{display:grid}
+.back:hover{background:rgba(255,255,255,.15)}
+
+main{flex:1;overflow-y:auto;position:relative}
+.screen{display:none;min-height:100%;padding:24px 20px 100px}
+.screen.active{display:block}
+.screen.grey{background:var(--grey)}
+
+/* Barra inferior */
+nav.bottom{height:56px;background:var(--black);display:flex;justify-content:space-between;align-items:center;padding:0 22px;flex-shrink:0}
+nav.bottom button{background:none;border:0;color:#fff;width:48px;height:48px;display:grid;place-items:center;position:relative;border-radius:50%}
+nav.bottom button:hover{background:rgba(255,255,255,.12)}
+
+/* Botão flutuante do carrinho */
+.fab{position:absolute;right:16px;bottom:70px;width:62px;height:46px;border-radius:50%;background:var(--red);border:0;color:#fff;display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,0,0,.25);z-index:5;transition:transform .15s}
+.fab:active{transform:scale(.94)}
+.fab[hidden]{display:none}
+.badge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#fff;color:var(--red);font-size:12px;font-weight:700;display:grid;place-items:center;border:2px solid var(--red)}
+nav.bottom .badge{top:2px;right:2px;background:var(--red);color:#fff;border-color:var(--black)}
+.badge[hidden]{display:none}
+.bump{animation:bump .3s}
+@keyframes bump{50%{transform:scale(1.15)}}
+
+/* Formulários */
+.form-login{padding-top:70px}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}
+.field input,.field select{width:100%;height:38px;border:1px solid var(--line);background:var(--grey);border-radius:10px;padding:0 12px;font:inherit;font-size:15px;color:var(--ink)}
+.field input:focus,.field select:focus{outline:2px solid var(--red);outline-offset:1px}
+.field.half input,.field.half select{width:55%}
+.hint{text-align:center;font-size:13px;margin-top:28px;line-height:1.6}
+.link{background:none;border:0;font-weight:700;text-decoration:underline;font-size:13px}
+
+/* Botões */
+.btn{display:block;width:100%;height:50px;background:var(--red);color:#fff;border:1px solid var(--red-dark);border-radius:12px;font-family:Kalam,cursive;font-size:24px;line-height:1;margin-top:10px;transition:filter .15s,transform .1s}
+.btn:hover{filter:brightness(1.05)}
+.btn:active{transform:scale(.98)}
+.btn.mono{font-family:'Space Mono',monospace;font-size:17px;letter-spacing:1px}
+.btn.soft{background:var(--red-soft);border-color:#c45f5f}
+.btn.outline{background:transparent;color:var(--ink);border-color:var(--line);font-family:Inter,sans-serif;font-size:15px;font-weight:600}
+
+/* Cardápio */
+.chips{display:flex;gap:6px;overflow-x:auto;margin:-10px -20px 18px;padding:0 20px 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;background:var(--grey);border:0;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:500}
+.chip.active{background:var(--red);color:#fff}
+.card{display:flex;gap:12px;align-items:center;background:var(--grey);border:1px solid var(--line);border-radius:6px;padding:8px 10px 8px 8px;margin-bottom:14px}
+.thumb{width:76px;height:58px;border-radius:50%;background:#fff;overflow:hidden;display:grid;place-items:center;font-size:30px;flex-shrink:0;border:1px solid #bbb}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.info{flex:1;min-width:0}
+.row1{display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:700}
+.row2{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
+.ellip{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.desc{font-size:12px;color:var(--muted)}
+.stepper{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.stepper button{width:28px;height:28px;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:18px;line-height:1;display:grid;place-items:center}
+.stepper button.minus{background:#fff;color:var(--red);border:1.5px solid var(--red)}
+.stepper span{min-width:16px;text-align:center;font-weight:700;font-size:14px}
+.stepper.sm button{width:22px;height:22px;font-size:15px}
+
+/* Carrinho */
+h2{font-size:22px;font-weight:600;margin:16px 0 22px}
+.line{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;margin-bottom:12px}
+.line .dots{flex:1;border-bottom:2px dotted #333;align-self:flex-end;margin-bottom:4px;min-width:12px}
+.total{display:flex;justify-content:space-between;align-items:baseline;font-size:20px;font-weight:600;margin:34px 0 36px}
+.pay{margin-bottom:22px}
+.pay label{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;margin-bottom:14px;cursor:pointer;width:max-content}
+.pay input{appearance:none;width:16px;height:16px;border:1.5px solid #333;border-radius:2px;background:#fff;display:grid;place-items:center;margin:0;cursor:pointer}
+.pay input:checked{background:var(--red);border-color:var(--red)}
+.pay input:checked::after{content:"";width:8px;height:4px;border:solid #fff;border-width:0 0 2px 2px;transform:rotate(-45deg) translate(1px,-1px)}
+.empty{text-align:center;padding-top:40px;color:var(--muted)}
+.empty .big{font-size:56px;margin-bottom:10px}
+
+/* Agendar */
+.days{display:flex;gap:8px;margin-bottom:20px}
+.day{flex:1;min-height:52px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:600;font-size:14px;line-height:1.3}
+.day small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.day.active{background:var(--red);color:#fff;border-color:var(--red)}
+.day.active small{color:#fff}
+.day:disabled{opacity:.45;cursor:not-allowed}
+.group-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:14px 0 8px}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.slot{height:38px;border-radius:8px;border:1px solid var(--line);background:#fff;font-family:'Space Mono',monospace;font-size:13px}
+.slot.active{background:var(--red);color:#fff;border-color:var(--red)}
+.note{font-size:13px;color:var(--muted);margin-bottom:6px}
+
+/* Confirmação */
+.done{text-align:center}
+.check{width:84px;height:60px;border-radius:50%;background:var(--red);margin:14px auto 18px;display:grid;place-items:center}
+.done h3{font-size:18px;font-weight:700;margin-bottom:40px}
+.order-num{font-size:22px;letter-spacing:2px;margin-bottom:22px}
+.done .msg{font-size:18px;line-height:1.35;text-align:left;max-width:240px;margin:0 auto 32px}
+.summary{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px;text-align:left;font-size:13px;margin-bottom:12px}
+.summary div{display:flex;justify-content:space-between;gap:8px;padding:3px 0}
+.summary .sep{border-top:1px dashed #999;margin-top:6px;padding-top:8px;font-weight:700}
+
+/* Perfil */
+.profile dl{background:var(--grey);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:20px}
+.profile dt{font-size:12px;font-weight:700;color:var(--muted)}
+.profile dd{font-size:15px;margin-bottom:12px}
+.profile dd:last-child{margin-bottom:0}
+
+/* Aviso */
+.toast{position:absolute;left:50%;bottom:130px;transform:translate(-50%,20px);background:#111;color:#fff;font-size:14px;padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:10;max-width:85%;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <button class="back" id="backBtn" aria-label="Voltar">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h1>A cantina</h1>
+  </header>
+
+  <main id="main">
+    <!-- LOGIN -->
+    <section class="screen" id="s-login">
+      <form class="form-login" id="formLogin" novalidate>
+        <div class="field"><label for="loginMat">Matrícula</label><input id="loginMat" inputmode="numeric" autocomplete="username"></div>
+        <div class="field"><label for="loginSenha">Senha</label><input id="loginSenha" type="password" autocomplete="current-password"></div>
+        <button class="btn" type="submit">Entrar</button>
+      </form>
+      <p class="hint">Não possui conta?<br><button class="link" data-go="cadastro">Cadastrar-se</button></p>
+    </section>
+
+    <!-- CADASTRO -->
+    <section class="screen" id="s-cadastro">
+      <form id="formCadastro" novalidate>
+        <div class="field"><label for="cadNome">Nome completo</label><input id="cadNome" autocomplete="name"></div>
+        <div class="field"><label for="cadMat">Matrícula</label><input id="cadMat" inputmode="numeric"></div>
+        <div class="field half"><label for="cadTurno">Turno</label>
+          <select id="cadTurno"><option value="">Selecione</option><option>Manhã</option><option>Tarde</option><option>Noite</option></select>
+        </div>
+        <div class="field half"><label for="cadTurma">Turma</label><input id="cadTurma"></div>
+        <div class="field"><label for="cadSenha">Senha</label><input id="cadSenha" type="password" autocomplete="new-password"></div>
+        <button class="btn" type="submit">Cadastrar</button>
+      </form>
+    </section>
+
+    <!-- CARDÁPIO -->
+    <section class="screen" id="s-cardapio">
+      <div class="chips" id="chips"></div>
+      <div id="menuList"></div>
+    </section>
+
+    <!-- CARRINHO -->
+    <section class="screen grey" id="s-carrinho">
+      <div id="cartContent"></div>
+    </section>
+
+    <!-- RETIRADA -->
+    <section class="screen grey" id="s-retirada">
+      <h2>Retirada</h2>
+      <button class="btn mono" id="btnRetirar">Retirar Pedido</button>
+      <button class="btn mono soft" data-go="agendar" style="margin-top:14px">Agendar Retirada</button>
+    </section>
+
+    <!-- AGENDAR -->
+    <section class="screen grey" id="s-agendar">
+      <h2>Agendar Retirada</h2>
+      <div class="days" id="days"></div>
+      <p class="note">Escolha o horário para retirar:</p>
+      <div id="slots"></div>
+      <button class="btn" id="btnAgendar" style="margin-top:24px">Confirmar</button>
+    </section>
+
+    <!-- CONFIRMADO -->
+    <section class="screen grey" id="s-confirmado">
+      <div class="done">
+        <div class="check"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></div>
+        <h3 id="doneTitle">Retirada</h3>
+        <p class="order-num" id="doneNum"></p>
+        <p class="msg" id="doneMsg"></p>
+        <div class="summary" id="doneSummary"></div>
+        <button class="btn" data-go-reset="cardapio">Novo pedido</button>
+      </div>
+    </section>
+
+    <!-- PERFIL -->
+    <section class="screen" id="s-perfil">
+      <div class="profile">
+        <h2>Meu perfil</h2>
+        <dl id="profileData"></dl>
+        <button class="btn outline" id="btnSair">Sair</button>
+      </div>
+    </section>
+  </main>
+
+  <button class="fab" id="fab" aria-label="Abrir carrinho" hidden>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.2a1.5 1.5 0 0 0 1.5 1.2h8.8a1.5 1.5 0 0 0 1.5-1.1L21 8H6.2"/></svg>
+    <span class="badge" id="fabBadge" hidden>0</span>
+  </button>
+
+  <nav class="bottom">
+    <button id="navCart" aria-label="Carrinho">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.2a1.5 1.5 0 0 0 1.5 1.2h8.8a1.5 1.5 0 0 0 1.5-1.1L21 8H6.2"/></svg>
+      <span class="badge" id="navBadge" hidden>0</span>
+    </button>
+    <button id="navProfile" aria-label="Perfil">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3.2" fill="currentColor"/><path d="M5.5 18.5c1.6-2.3 3.9-3.5 6.5-3.5s4.9 1.2 6.5 3.5" fill="currentColor"/></svg>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+/* ===== DADOS DO CARDÁPIO =====
+   Para usar fotos: coloque os arquivos na pasta "img" com o nome indicado em "img".
+   Se a foto não existir, aparece o emoji. */
+const MENU = [
+  {id:'pao',       cat:'Salgados', nome:'Pão de Queijo',        preco:7,   emoji:'🧀', img:'img/pao-de-queijo.jpg',    desc:'O clássico mineiro, assado na hora. Porção com 6 unidades.'},
+  {id:'sanduiche', cat:'Salgados', nome:'Sanduíche natural',    preco:5,   emoji:'🥪', img:'img/sanduiche.jpg',        desc:'Leve e fresquinho, preparado com frango, cenoura e alface.'},
+  {id:'torta',     cat:'Salgados', nome:'Torta de frango',      preco:8,   emoji:'🥧', img:'img/torta-de-frango.jpg',  desc:'Massa macia recheada com frango cremoso e milho.'},
+  {id:'coxinha',   cat:'Salgados', nome:'Coxinha',              preco:6,   emoji:'🍗', img:'img/coxinha.jpg',          desc:'Massa crocante com recheio de frango com catupiry.'},
+  {id:'palha',     cat:'Doces',    nome:'Palha Italiana',       preco:3,   emoji:'🍫', img:'img/palha-italiana.jpg',   desc:'Brigadeiro com biscoito, cortado em quadradinhos.'},
+  {id:'brigadeiro',cat:'Doces',    nome:'Brigadeiro',           preco:2.5, emoji:'🍬', img:'img/brigadeiro.jpg',       desc:'Brigadeiro gourmet com granulado belga.'},
+  {id:'bolo',      cat:'Doces',    nome:'Bolo de cenoura',      preco:5,   emoji:'🍰', img:'img/bolo-de-cenoura.jpg',  desc:'Fatia generosa com cobertura de chocolate.'},
+  {id:'salada',    cat:'Veganos',  nome:'Salada de frutas',     preco:7,   emoji:'🍓', img:'img/salada-de-frutas.jpg', desc:'Frutas frescas da estação, servidas geladas.'},
+  {id:'wrap',      cat:'Veganos',  nome:'Wrap de grão-de-bico', preco:9,   emoji:'🌯', img:'img/wrap.jpg',             desc:'Tortilha integral com homus, legumes e folhas.'},
+  {id:'guaravita', cat:'Bebidas',  nome:'Guaravita',            preco:2,   emoji:'🥤', img:'img/guaravita.jpg',        desc:'Copo de 290 ml, bem gelado.'},
+  {id:'suco',      cat:'Bebidas',  nome:'Suco natural',         preco:6,   emoji:'🧃', img:'img/suco.jpg',             desc:'Laranja, limão ou maracujá. 300 ml.'},
+  {id:'cafe',      cat:'Bebidas',  nome:'Café',                 preco:3,   emoji:'☕', img:'img/cafe.jpg',             desc:'Café coado na hora, 150 ml.'},
+];
+const CATS = ['Todos','Salgados','Doces','Veganos','Bebidas'];
+/* Horário de funcionamento da cantina (para o agendamento) */
+const ABRE = 7*60, FECHA = 21*60+30, INTERVALO = 30, PREPARO_MIN = 20;
+
+/* ===== ESTADO ===== */
+const state = {
+  user: null,           // {nome, matricula, turno, turma}
+  logged: false,
+  cart: {},             // {idDoItem: quantidade}
+  payment: '',
+  cat: 'Todos',
+  sched: {day: null, time: null},
+  order: null,
+};
+const $ = s => document.querySelector(s);
+const brl = v => 'R$' + v.toFixed(2).replace('.', ',');
+const item = id => MENU.find(m => m.id === id);
+const cartCount = () => Object.values(state.cart).reduce((a,b) => a+b, 0);
+const cartTotal = () => Object.entries(state.cart).reduce((t,[id,q]) => t + item(id).preco*q, 0);
+const el = (tag, props={}, ...kids) => {
+  const e = Object.assign(document.createElement(tag), props);
+  kids.flat().forEach(k => e.append(k));
+  return e;
+};
+
+/* ===== NAVEGAÇÃO ===== */
+const stack = [];
+const NO_BACK = ['login','confirmado'];
+const RENDER = {cardapio: renderMenu, carrinho: renderCart, agendar: renderSchedule, confirmado: renderDone, perfil: renderProfile};
+function go(name, {reset=false} = {}){
+  if (reset) stack.length = 0;
+  if (stack[stack.length-1] !== name) stack.push(name);
+  render();
+}
+function back(){ if (stack.length > 1){ stack.pop(); render(); } }
+function render(){
+  const cur = stack[stack.length-1];
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 's-'+cur));
+  $('#backBtn').classList.toggle('show', stack.length > 1 && !NO_BACK.includes(cur));
+  $('#fab').hidden = cur !== 'cardapio';
+  $('#main').scrollTop = 0;
+  RENDER[cur]?.();
+  updateBadges();
+}
+
+let toastTimer;
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+function updateBadges(bump){
+  const n = cartCount();
+  for (const b of [$('#fabBadge'), $('#navBadge')]){
+    b.hidden = n === 0; b.textContent = n;
+    if (bump){ b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
+  }
+}
+function setQty(id, delta){
+  const q = (state.cart[id] || 0) + delta;
+  if (q <= 0) delete state.cart[id]; else state.cart[id] = q;
+  if (delta > 0) toast(`${item(id).nome} adicionado ao carrinho`);
+  updateBadges(delta > 0);
+}
+function stepper(id, onChange, small){
+  const q = state.cart[id] || 0;
+  const wrap = el('div', {className: 'stepper' + (small ? ' sm' : '')});
+  if (q > 0){
+    wrap.append(
+      el('button', {className:'minus', type:'button', textContent:'−', ariaLabel:'Remover um', onclick:() => {setQty(id,-1); onChange();}}),
+      el('span', {textContent:q}),
+    );
+  }
+  wrap.append(el('button', {type:'button', textContent:'+', ariaLabel:'Adicionar um', onclick:() => {setQty(id,1); onChange();}}));
+  return wrap;
+}
+
+/* ===== LOGIN / CADASTRO ===== */
+$('#formLogin').addEventListener('submit', e => {
+  e.preventDefault();
+  const mat = $('#loginMat').value.trim(), senha = $('#loginSenha').value;
+  if (!mat || !senha) return toast('Preencha matrícula e senha');
+  if (!state.user || state.user.matricula !== mat) state.user = {nome:'Aluno(a)', matricula:mat, turno:'—', turma:'—'};
+  state.logged = true;
+  $('#loginSenha').value = '';
+  go('cardapio', {reset:true});
+});
+$('#formCadastro').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = id => $(id).value.trim();
+  if (!v('#cadNome') || !v('#cadMat') || !v('#cadTurno') || !v('#cadTurma') || !$('#cadSenha').value)
+    return toast('Preencha todos os campos');
+  state.user = {nome:v('#cadNome'), matricula:v('#cadMat'), turno:v('#cadTurno'), turma:v('#cadTurma')};
+  e.target.reset();
+  $('#loginMat').value = state.user.matricula;
+  toast('Cadastro realizado! Faça login.');
+  go('login', {reset:true});
+});
+
+/* ===== CARDÁPIO ===== */
+function renderMenu(){
+  const chips = $('#chips'); chips.replaceChildren();
+  CATS.forEach(c => chips.append(el('button', {
+    className:'chip' + (state.cat === c ? ' active' : ''), textContent:c,
+    onclick:() => { state.cat = c; renderMenu(); }
+  })));
+  const list = $('#menuList'); list.replaceChildren();
+  MENU.filter(m => state.cat === 'Todos' || m.cat === state.cat).forEach(m => {
+    const thumb = el('div', {className:'thumb'});
+    const img = el('img', {src:m.img, alt:m.nome, loading:'lazy'});
+    img.onerror = () => { thumb.textContent = m.emoji; };
+    thumb.append(img);
+    list.append(el('div', {className:'card'},
+      thumb,
+      el('div', {className:'info'},
+        el('div', {className:'row1'}, el('span', {className:'ellip', textContent:m.nome}), el('span', {textContent:brl(m.preco)})),
+        el('div', {className:'row2'}, el('span', {className:'desc ellip', textContent:m.desc, title:m.desc}), stepper(m.id, renderMenu)),
+      ),
+    ));
+  });
+}
+
+/* ===== CARRINHO ===== */
+function renderCart(){
+  const box = $('#cartContent'); box.replaceChildren();
+  const ids = Object.keys(state.cart);
+  if (!ids.length){
+    box.append(el('div', {className:'empty'},
+      el('div', {className:'big', textContent:'🛒'}),
+      el('p', {textContent:'Seu carrinho está vazio.'}),
+      el('button', {className:'btn', textContent:'Ver cardápio', style:'margin-top:24px', onclick:() => go('cardapio')}),
+    ));
+    return;
+  }
+  box.append(el('h2', {textContent:'Seu Pedido'}));
+  ids.forEach(id => {
+    const m = item(id), q = state.cart[id];
+    box.append(el('div', {className:'line'},
+      el('span', {textContent:`${q}x ${m.nome}`}),
+      el('span', {className:'dots'}),
+      el('span', {textContent:brl(m.preco*q)}),
+      stepper(id, renderCart, true),
+    ));
+  });
+  box.append(el('div', {className:'total'}, el('span', {textContent:'Total'}), el('span', {textContent:brl(cartTotal())})));
+  box.append(el('h2', {textContent:'Forma de pagamento', style:'margin-bottom:16px'}));
+  const pay = el('div', {className:'pay'});
+  ['PIX','Cartão','Dinheiro'].forEach(p => {
+    const input = el('input', {type:'checkbox', checked: state.payment === p});
+    input.onchange = () => { state.payment = input.checked ? p : ''; renderCart(); };
+    pay.append(el('label', {}, input, p));
+  });
+  box.append(pay);
+  box.append(el('button', {className:'btn', textContent:'Confirmar', onclick:() => {
+    if (!state.payment) return toast('Escolha a forma de pagamento');
+    go('retirada');
+  }}));
+}
+
+/* ===== AGENDAMENTO ===== */
+const pad = n => String(n).padStart(2,'0');
+const hhmm = min => `${pad(Math.floor(min/60))}:${pad(min%60)}`;
+const WEEK = ['dom','seg','ter','qua','qui','sex','sáb'];
+function slotsFor(dayKey){
+  const all = [];
+  for (let t = ABRE; t <= FECHA; t += INTERVALO) all.push(t);
+  if (dayKey === 'amanha') return all;
+  const now = new Date(), nowMin = now.getHours()*60 + now.getMinutes();
+  return all.filter(t => t >= nowMin + PREPARO_MIN);
+}
+function renderSchedule(){
+  const today = new Date(), tomorrow = new Date(Date.now() + 864e5);
+  const fmt = d => `${WEEK[d.getDay()]}, ${pad(d.getDate())}/${pad(d.getMonth()+1)}`;
+  const hasToday = slotsFor('hoje').length > 0;
+  if (!state.sched.day || (state.sched.day === 'hoje' && !hasToday)) state.sched.day = hasToday ? 'hoje' : 'amanha';
+
+  const days = $('#days'); days.replaceChildren();
+  [['hoje','Hoje',today],['amanha','Amanhã',tomorrow]].forEach(([key,label,d]) => {
+    days.append(el('button', {
+      className:'day' + (state.sched.day === key ? ' active' : ''),
+      disabled: key === 'hoje' && !hasToday,
+      onclick:() => { state.sched = {day:key, time:null}; renderSchedule(); },
+    }, label, el('small', {textContent: key === 'hoje' && !hasToday ? 'cantina fechada' : fmt(d)})));
+  });
+
+  const box = $('#slots'); box.replaceChildren();
+  const groups = [['Manhã',0,12*60],['Tarde',12*60,18*60],['Noite',18*60,24*60]];
+  const slots = slotsFor(state.sched.day);
+  groups.forEach(([name,from,to]) => {
+    const g = slots.filter(t => t >= from && t < to);
+    if (!g.length) return;
+    box.append(el('p', {className:'group-title', textContent:name}));
+    const grid = el('div', {className:'slots'});
+    g.forEach(t => grid.append(el('button', {
+      className:'slot' + (state.sched.time === t ? ' active' : ''), textContent:hhmm(t),
+      onclick:() => { state.sched.time = t; renderSchedule(); },
+    })));
+    box.append(grid);
+  });
+}
+$('#btnAgendar').onclick = () => {
+  if (state.sched.time == null) return toast('Escolha um horário');
+  finalize({tipo:'agendada', dia:state.sched.day, hora:hhmm(state.sched.time)});
+};
+$('#btnRetirar').onclick = () => finalize({tipo:'agora'});
+
+function finalize(retirada){
+  state.order = {
+    numero: String(Math.floor(100000 + Math.random()*900000)),
+    itens: Object.entries(state.cart).map(([id,q]) => ({nome:item(id).nome, q, sub:item(id).preco*q})),
+    total: cartTotal(), pagamento: state.payment, retirada,
+  };
+  state.cart = {}; state.payment = ''; state.sched = {day:null, time:null};
+  go('confirmado', {reset:true});
+}
+
+/* ===== CONFIRMAÇÃO ===== */
+function renderDone(){
+  const o = state.order; if (!o) return;
+  const r = o.retirada;
+  $('#doneTitle').textContent = r.tipo === 'agora' ? 'Retirada' : 'Retirada agendada';
+  $('#doneNum').textContent = o.numero;
+  $('#doneMsg').textContent = r.tipo === 'agora'
+    ? 'Retire o pedido na cantina'
+    : `Retire o pedido na cantina ${r.dia === 'hoje' ? 'hoje' : 'amanhã'} às ${r.hora}`;
+  const s = $('#doneSummary'); s.replaceChildren();
+  o.itens.forEach(i => s.append(el('div', {}, el('span', {textContent:`${i.q}x ${i.nome}`}), el('span', {textContent:brl(i.sub)}))));
+  s.append(el('div', {className:'sep'}, el('span', {textContent:`Total · ${o.pagamento}`}), el('span', {textContent:brl(o.total)})));
+}
+
+/* ===== PERFIL ===== */
+function renderProfile(){
+  const dl = $('#profileData'); dl.replaceChildren();
+  const u = state.user || {};
+  [['Nome',u.nome],['Matrícula',u.matricula],['Turno',u.turno],['Turma',u.turma]]
+    .forEach(([k,v]) => dl.append(el('dt', {textContent:k}), el('dd', {textContent:v || '—'})));
+}
+$('#btnSair').onclick = () => {
+  state.logged = false; state.cart = {}; state.payment = '';
+  go('login', {reset:true});
+};
+
+/* ===== BOTÕES GERAIS ===== */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-go],[data-go-reset]');
+  if (!b) return;
+  if (b.dataset.go) go(b.dataset.go);
+  else go(b.dataset.goReset, {reset:true});
+});
+$('#backBtn').onclick = back;
+$('#fab').onclick = () => go('carrinho');
+$('#navCart').onclick = () => state.logged ? go('carrinho') : toast('Faça login primeiro');
+$('#navProfile').onclick = () => state.logged ? go('perfil') : toast('Faça login primeiro');
+
+go('login');
+</script>
+</body>
+</html>
