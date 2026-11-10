@@ -34,6 +34,7 @@ main{flex:1;overflow-y:auto;position:relative}
 
 /* Barra inferior */
 nav.bottom{height:56px;background:var(--black);display:flex;justify-content:space-between;align-items:center;padding:0 22px;flex-shrink:0}
+nav.bottom[hidden]{display:none}
 nav.bottom button{background:none;border:0;color:#fff;width:48px;height:48px;display:grid;place-items:center;position:relative;border-radius:50%}
 nav.bottom button:hover{background:rgba(255,255,255,.12)}
 
@@ -219,7 +220,7 @@ h2{font-size:22px;font-weight:600;margin:16px 0 22px}
     <span class="badge" id="fabBadge" hidden>0</span>
   </button>
 
-  <nav class="bottom">
+  <nav class="bottom" id="navBottom">
     <button id="navCart" aria-label="Carrinho">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.2a1.5 1.5 0 0 0 1.5 1.2h8.8a1.5 1.5 0 0 0 1.5-1.1L21 8H6.2"/></svg>
       <span class="badge" id="navBadge" hidden>0</span>
@@ -290,6 +291,7 @@ function render(){
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 's-'+cur));
   $('#backBtn').classList.toggle('show', stack.length > 1 && !NO_BACK.includes(cur));
   $('#fab').hidden = cur !== 'cardapio';
+  $('#navBottom').hidden = ['login','cadastro'].includes(cur);
   $('#main').scrollTop = 0;
   RENDER[cur]?.();
   updateBadges();
