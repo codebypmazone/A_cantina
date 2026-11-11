@@ -79,6 +79,13 @@ nav.bottom .badge{top:2px;right:2px;background:var(--red);color:#fff;border-colo
 .row2{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
 .ellip{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .desc{font-size:12px;color:var(--muted)}
+.card{cursor:pointer;transition:background .15s}
+.card:hover{background:#d0d0d0}
+.card:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.card.open{align-items:flex-start}
+.card.open .ellip{white-space:normal;overflow:visible}
+.card.open .row2{align-items:flex-end}
+.card.open .desc{line-height:1.45}
 .stepper{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .stepper button{width:28px;height:28px;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:18px;line-height:1;display:grid;place-items:center}
 .stepper button.minus{background:#fff;color:var(--red);border:1.5px solid var(--red)}
@@ -264,6 +271,7 @@ const state = {
   cart: {},             // {idDoItem: quantidade}
   payment: '',
   cat: 'Todos',
+  open: new Set(),      // cards do cardápio expandidos
   sched: {day: null, time: null},
   order: null,
 };
@@ -366,7 +374,12 @@ function renderMenu(){
     const img = el('img', {src:m.img, alt:m.nome});
     img.onerror = () => { thumb.textContent = m.emoji; };
     thumb.append(img);
-    list.append(el('div', {className:'card'},
+    const open = state.open.has(m.id);
+    list.append(el('div', {
+      className:'card' + (open ? ' open' : ''), role:'button', tabIndex:0, ariaExpanded:String(open),
+      onclick:e => { if (!e.target.closest('button')) toggleCard(m.id); },
+      onkeydown:e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget){ e.preventDefault(); toggleCard(m.id); } },
+    },
       thumb,
       el('div', {className:'info'},
         el('div', {className:'row1'}, el('span', {className:'ellip', textContent:m.nome}), el('span', {textContent:brl(m.preco)})),
@@ -374,6 +387,11 @@ function renderMenu(){
       ),
     ));
   });
+}
+
+function toggleCard(id){
+  state.open.has(id) ? state.open.delete(id) : state.open.add(id);
+  renderMenu();
 }
 
 /* ===== CARRINHO ===== */
